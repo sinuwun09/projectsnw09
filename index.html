@@ -500,12 +500,12 @@ function applyAi(d) {
   if (pts.length) state.pertemuan = pts;
   state.formatif = str(d.formatif); state.sumatif = str(d.sumatif);
 }
-function aiPrompt() {
+function aiPrompt(forCopy) {
   var s = state, n = Math.max(1, Math.min(8, parseInt(s.ai.n, 10) || 3));
   return "Anda adalah guru dan pengembang kurikulum di Indonesia. Susun isi Rencana Pembelajaran Mendalam (RPM) dengan pendekatan Pembelajaran Mendalam (berkesadaran/mindful, bermakna/meaningful, menggembirakan/joyful) dalam Bahasa Indonesia yang baku.\n\n" +
     "DATA:\n- Sekolah: " + s.sekolah + "\n- Mata Pelajaran/Elemen: " + s.mapel + "\n- Program Keahlian: " + s.program + "\n- Kelas: " + s.kelas + "\n- Alokasi waktu: " + s.waktu +
     "\n- Topik/materi pokok: " + s.ai.topik + "\n- Model pembelajaran: " + s.ai.model + "\n- Jumlah pertemuan: " + n + "\n- Catatan guru: " + (s.ai.catatan || "-") + "\n\n" +
-    "Balas HANYA dengan satu objek JSON (tanpa teks lain, tanpa pagar kode) dengan bentuk persis:\n" +
+    (forCopy ? "Balas dengan satu objek JSON yang valid di dalam SATU blok kode ```json, tanpa teks lain di luar blok kode, dengan bentuk persis:\n" : "Balas HANYA dengan satu objek JSON (tanpa teks lain, tanpa pagar kode) dengan bentuk persis:\n") +
     '{"identifikasiMurid": "1 paragraf kesiapan/pengetahuan awal murid", "identifikasiMateri": "1 paragraf jenis pengetahuan dan karakter materi", ' +
     '"dimensi": ["2-4 nama dari: ' + DIMS.join("; ") + '"], "topik": "topik atau produk pembelajaran", "tujuan": ["3-6 tujuan pembelajaran terukur"], ' +
     '"praktik": "model pembelajaran dan integrasi prinsip pembelajaran mendalam", "kemitraan": [{"mapel": "mata pelajaran/pihak mitra", "uraian": "bentuk kolaborasi"}], ' +
@@ -513,7 +513,7 @@ function aiPrompt() {
     '"pertemuan": [{"langkah": [{"nama": "nama langkah", "aktivitas": ["aktivitas guru dan murid"], "sumber": "sumber materi"}]}], ' +
     '"formatif": ["bentuk asesmen formatif"], "sumatif": ["bentuk asesmen sumatif"]}\n\n' +
     "ATURAN:\n- Buat tepat " + n + " pertemuan. Tiap pertemuan memuat langkah Pendahuluan, langkah-langkah inti mengikuti sintaks " + s.ai.model + " (sebarkan sintaks secara berurutan antarpertemuan dan tandai prinsip Mindful/Meaningful/Joyful pada nama langkah bila sesuai), lalu Penutup berisi refleksi.\n" +
-    "- Tiap langkah berisi 3-8 aktivitas konkret dan spesifik pada topik, satu kalimat per aktivitas.\n- Gunakan kata \"murid\", bukan \"siswa\".\n- Apit istilah asing dengan satu tanda bintang (*contoh*). Jangan gunakan markdown lain.";
+    "- Tiap langkah berisi 3-8 aktivitas konkret dan spesifik pada topik, satu kalimat per aktivitas.\n- Gunakan kata \"murid\", bukan \"siswa\".\n- Apit istilah asing dengan satu tanda bintang (*contoh*). Jangan gunakan markdown lain.\n- Jangan pakai tanda kutip ganda di dalam isi teks; bila perlu mengutip, pakai tanda kutip tunggal ('...').";
 }
 function runAi() {
   var note = document.getElementById("aiNote");
@@ -538,12 +538,58 @@ function runAi() {
   });
 }
 
+/* ---------- pembaca JSON yang toleran terhadap jawaban AI ---------- */
+var OPENQ = { '"': 1, "“": 1, "”": 1, "„": 1 };
+function repairJson(s) {
+  /* ambil satu objek {…} dengan menghitung kurung, perbaiki kutip & baris baru di dalam teks */
+  var start = s.indexOf("{"); if (start < 0) return { text: "", complete: false };
+  var out = "", inStr = false, depth = 0, done = false;
+  for (var i = start; i < s.length; i++) {
+    var ch = s[i];
+    if (!inStr) {
+      if (OPENQ[ch]) { inStr = true; out += '"'; continue; }
+      if (ch === "{" || ch === "[") depth++;
+      if (ch === "}" || ch === "]") depth--;
+      out += ch;
+      if (depth === 0) { done = true; break; }
+      continue;
+    }
+    if (ch === "\\") { var nx0 = s[i + 1]; if (nx0 && '"\\/bfnrtu'.indexOf(nx0) >= 0) { out += ch + nx0; i++; } else out += "\\\\"; continue; }
+    if (OPENQ[ch]) {
+      var j = i + 1; while (j < s.length && /\s/.test(s[j])) j++;
+      var nx = s[j];
+      if (j >= s.length || nx === "," || nx === ":" || nx === "}" || nx === "]") { inStr = false; out += '"'; }
+      else out += ch === '"' ? '\\"' : ch;
+      continue;
+    }
+    if (ch === "\n") { out += "\\n"; continue; }
+    if (ch === "\r") continue;
+    if (ch === "\t") { out += " "; continue; }
+    out += ch;
+  }
+  out = out.replace(/,(\s*[}\]])/g, "$1");
+  return { text: out, complete: done };
+}
+function parseLoose(raw) {
+  var s = String(raw || "").replace(/[   　]/g, " ").replace(/[​-‍⁠﻿]/g, "");
+  var a = s.indexOf("{"), z = s.lastIndexOf("}");
+  if (a >= 0 && z > a) { try { return { value: JSON.parse(s.slice(a, z + 1)) }; } catch (e) {} }
+  var r = repairJson(s);
+  if (!r.text) return { value: null };
+  try { return { value: JSON.parse(r.text) }; }
+  catch (e) {
+    var m = /position (\d+)/.exec(e && e.message || ""), near = "";
+    if (m) { var p = +m[1]; near = r.text.slice(Math.max(0, p - 25), p + 25).replace(/\\n/g, " ").trim(); }
+    return { value: null, incomplete: !r.complete, near: near };
+  }
+}
+
 /* ---------- salin–tempel ke AI mana pun ---------- */
 function copyPrompt() {
   var note = document.getElementById("cpNote"), box = document.getElementById("promptBox");
   note.className = "note";
   if (!state.ai.topik.trim() && !state.mapel.trim()) { note.className = "note err"; note.textContent = "Isi topik atau mata pelajaran terlebih dahulu."; return; }
-  var text = aiPrompt();
+  var text = aiPrompt(true);
   box.value = text;
   var fallback = function () { box.hidden = false; box.focus(); box.select(); note.textContent = "Perintah sudah dipilih — tekan Ctrl+C (atau tahan lalu Salin) untuk menyalin."; };
   try {
@@ -552,12 +598,12 @@ function copyPrompt() {
 }
 function applyPasted() {
   var note = document.getElementById("apNote"), raw = document.getElementById("pasteBox").value;
-  var a = raw.indexOf("{"), z = raw.lastIndexOf("}");
-  var d = null;
-  if (a >= 0 && z > a) { try { d = JSON.parse(raw.slice(a, z + 1)); } catch (e) { d = null; } }
+  var res = parseLoose(raw), d = res.value;
   if (!d || typeof d !== "object") {
     note.className = "note err";
-    note.textContent = raw.trim() ? "Jawaban tidak terbaca. Pastikan seluruh jawaban AI ikut tersalin, dari tanda { pertama sampai } terakhir." : "Tempel jawaban AI terlebih dahulu.";
+    note.textContent = !raw.trim() ? "Tempel jawaban AI terlebih dahulu." :
+      res.incomplete ? "Jawaban AI terpotong (tanda } penutup kurang). Minta AI menulis ulang atau kurangi jumlah pertemuan, lalu salin lagi." :
+      "Jawaban tidak terbaca" + (res.near ? " di sekitar: “" + res.near + "”" : "") + ". Minta AI: “perbaiki agar menjadi JSON yang valid”, lalu salin lagi.";
     return;
   }
   applyAi(d); save(); renderForm(); renderPreview();
