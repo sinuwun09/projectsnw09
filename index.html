@@ -113,6 +113,36 @@ textarea { resize: vertical; min-height: 58px; line-height: 1.45 }
 .paper .pt th { background: var(--doc-peach); font-size: .84em; text-align: center; vertical-align: middle; line-height: 1.3 }
 .paper .pt td:first-child { font-weight: bold }
 .paper .gap { height: 1em }
+.pages { display: flex; flex-direction: column; gap: 18px; padding-bottom: 4px }
+.paper .pgl { font-family: var(--font-text); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: #8a8f8b; text-align: right; margin: -2em 0 1.2em }
+.paper ol { margin: 0; padding-left: 42px }
+.paper ol.b2 { padding-left: 62px }
+.paper .rb { margin: .4em 0 0 20px; width: calc(100% - 20px) }
+.paper .rb td, .paper .rb th { border: 1px solid #000; padding: 3px 5px; vertical-align: top; text-align: left; font-size: .86em; line-height: 1.35 }
+.paper .rb th { background: var(--doc-peach); text-align: center; vertical-align: middle }
+.paper .rb td.n { text-align: center }
+.paper .formula { padding-left: 20px; margin-top: .4em; font-size: .92em }
+.paper .lead { text-align: justify; margin-bottom: 2em }
+.paper .sig td { text-align: center; vertical-align: top; padding: 0 4px; line-height: 1.5 }
+.paper .sig .sp { height: 4.5em }
+.paper .sig .nm { font-weight: bold; text-decoration: underline }
+.paper .kv { margin: .2em 0 1em; border: 1px solid #000 }
+.paper .kv td { padding: 2px 8px; vertical-align: top }
+.paper.land { max-width: 1123px; padding: 5% 5% }
+.paper .bmc-wrap { overflow-x: auto }
+.paper .bmc { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); min-width: 620px; border: 1px solid #000; font-size: .78em; line-height: 1.35 }
+.paper .bmc > div { border: 1px solid #000; padding: 5px 6px; min-height: 8em; min-width: 0 }
+.paper .bmc h4 { margin: 0; font-size: 1.05em }
+.paper .bmc .en { font-style: italic; color: #555; font-size: .85em; margin-bottom: 3px }
+.paper .bmc ul { padding-left: 13px }
+.paper .bmc li::before { left: -12px }
+.paper .bmc .kp { grid-column: 1 / 3; grid-row: 1 / 3 } .paper .bmc .ka { grid-column: 3 / 5; grid-row: 1 }
+.paper .bmc .kr { grid-column: 3 / 5; grid-row: 2 } .paper .bmc .vp { grid-column: 5 / 7; grid-row: 1 / 3 }
+.paper .bmc .cr { grid-column: 7 / 9; grid-row: 1 } .paper .bmc .ch { grid-column: 7 / 9; grid-row: 2 }
+.paper .bmc .cs { grid-column: 9 / 11; grid-row: 1 / 3 } .paper .bmc .co { grid-column: 1 / 6; grid-row: 3; min-height: 6em }
+.paper .bmc .rv { grid-column: 6 / 11; grid-row: 3; min-height: 6em }
+.sec > h2 .ltr.w { width: auto; padding: 0 5px }
+.paper .dots { color: #555; letter-spacing: .1em; padding-left: 20px; overflow: hidden; white-space: nowrap }
 </style>
 </head>
 <body>
@@ -131,7 +161,7 @@ textarea { resize: vertical; min-height: 58px; line-height: 1.45 }
   <div class="form" id="form"></div>
   <div class="pv">
     <div class="pv-h"><span>Pratinjau dokumen</span></div>
-    <div class="pv-scroll"><div class="paper" id="paper"></div></div>
+    <div class="pv-scroll"><div class="pages" id="paper"></div></div>
   </div>
 </div>
 
@@ -165,11 +195,57 @@ function example() { return {
     { langkah: [{ nama: "", aktivitas: "", sumber: "" }] },
     { langkah: [{ nama: "", aktivitas: "", sumber: "" }] }
   ],
-  formatif: "", sumatif: "",
+  asesmenAwal: "Kuis diagnostik 10 soal tentang konversi bilangan biner–desimal dan kelas IP Address\nTanya jawab pengalaman murid memakai jaringan di rumah dan di sekolah\nAngket singkat gaya belajar dan minat terhadap materi jaringan",
+  formatif: "Observasi keaktifan dan kerja sama kelompok selama diskusi proyek\nPemeriksaan lembar perhitungan subnetting CIDR/VLSM tiap kelompok\nRefleksi tertulis di akhir setiap pertemuan (*exit ticket*)",
+  sumatif: "Presentasi dokumen *Network Design & Addressing Blueprint*\nUji kinerja simulasi topologi di Cisco Packet Tracer sesuai rancangan",
+  rubrik: [
+    { aspek: "Ketepatan perhitungan subnet (CIDR/VLSM)", k4: "Seluruh *network address*, *broadcast*, dan rentang host benar serta efisien", k3: "Sebagian besar perhitungan benar, ada 1–2 kesalahan kecil", k2: "Perhitungan benar untuk sebagian subnet, alokasi kurang efisien", k1: "Banyak perhitungan salah dan tidak sesuai kebutuhan host" },
+    { aspek: "Rancangan topologi", k4: "Topologi lengkap untuk 5 divisi, rapi, dan diberi label IP", k3: "Topologi sesuai kebutuhan, label kurang lengkap", k2: "Topologi belum mencakup semua divisi", k1: "Topologi tidak sesuai kebutuhan" },
+    { aspek: "Implementasi simulasi", k4: "Semua host terhubung dan uji *ping* antar-subnet berhasil", k3: "Sebagian besar host terhubung, satu subnet bermasalah", k2: "Konfigurasi baru sebagian, banyak uji koneksi gagal", k1: "Simulasi belum berjalan" },
+    { aspek: "Presentasi dan kerja sama", k4: "Penjelasan runtut dan semua anggota berperan aktif", k3: "Penjelasan jelas, sebagian anggota aktif", k2: "Penjelasan kurang runtut, didominasi satu anggota", k1: "Belum mampu menjelaskan hasil proyek" }
+  ],
+  remedial: "Bimbingan ulang perhitungan subnet dengan tabel bantu blok 2ⁿ bagi murid yang belum mencapai KKTP\nLatihan terbimbing 5 soal VLSM bertahap, lalu uji ulang",
+  pengayaan: "Merancang pengalamatan IPv6 untuk gedung yang sama\nMenambahkan *routing* antar-VLAN pada simulasi topologi",
+  lkpd: {
+    judul: "Perancangan dan Simulasi Pengalamatan IP berbasis VLSM",
+    tujuan: "Murid mampu menghitung pembagian subnet VLSM dari satu blok /24 sesuai kebutuhan host\nMurid mampu mengonfigurasi alamat IP pada simulasi topologi di Cisco Packet Tracer\nMurid mampu menguji konektivitas antar-subnet",
+    alat: "Komputer/laptop dengan Cisco Packet Tracer\n*IP Subnet Calculator* untuk memeriksa hasil\nDraw.io untuk menggambar topologi\nLembar tabel perhitungan subnet",
+    k3: "Periksa kabel daya dan stopkontak dalam kondisi aman sebelum menyalakan komputer\nDuduk dengan posisi ergonomis dan atur jarak pandang ke monitor\nSimpan pekerjaan secara berkala agar data tidak hilang",
+    langkah: "Baca studi kasus kebutuhan host 5 divisi di gedung 3 lantai\nUrutkan kebutuhan host dari yang terbesar ke yang terkecil\nTentukan prefix setiap subnet dengan rumus 2ⁿ − 2 ≥ jumlah host\nHitung *network address*, *broadcast address*, dan rentang host tiap subnet\nGambar rancangan topologi di Draw.io lengkap dengan label IP\nBuat topologi di Cisco Packet Tracer sesuai rancangan\nKonfigurasikan alamat IP dan *gateway* pada setiap perangkat\nUji koneksi dengan perintah *ping* antarhost dan antar-subnet\nCatat hasil pengujian pada tabel laporan",
+    tugas: "Berapa jumlah alamat IP yang tidak terpakai pada rancangan Anda?\nMengapa VLSM lebih efisien dibanding subnetting dengan ukuran blok yang sama?\nJika divisi terbesar bertambah menjadi 120 host, apa yang harus diubah pada rancangan?"
+  },
+  bmc: {
+    produk: "Jasa Perancangan dan Instalasi Jaringan untuk Kantor/Sekolah Kecil (Teaching Factory TKJ)",
+    mitra: "Toko/distributor perangkat jaringan (router, switch, kabel)\nPenyedia layanan internet (ISP) lokal\nDU/DI mitra sekolah bidang jaringan",
+    aktivitas: "Survei kebutuhan dan perancangan topologi\nPerhitungan pengalamatan IP (VLSM/CIDR)\nInstalasi, konfigurasi, dan pengujian jaringan\nPemeliharaan berkala",
+    sumberDaya: "Murid dan guru TKJ bersertifikat kompetensi\nLaboratorium jaringan dan alat uji (*LAN tester*, *crimping tool*)\nPerangkat lunak simulasi Cisco Packet Tracer",
+    nilai: "Rancangan jaringan efisien tanpa pemborosan alamat IP\nDokumen *blueprint* jaringan yang rapi dan mudah dirawat\nBiaya lebih terjangkau dibanding vendor umum",
+    hubungan: "Konsultasi gratis sebelum pengerjaan\nGaransi layanan 3 bulan\nGrup WhatsApp layanan purnajual",
+    saluran: "Media sosial sekolah dan jurusan TKJ\nPameran karya/expo SMK\nRekomendasi DU/DI dan alumni",
+    segmen: "Kantor kecil dan UMKM di sekitar Tangerang\nSekolah dasar dan menengah\nWarnet, kafe, dan rumah kos",
+    biaya: "Pembelian perangkat dan kabel jaringan\nTransportasi ke lokasi pelanggan\nPerawatan peralatan laboratorium\nPromosi",
+    pendapatan: "Biaya jasa perancangan dan instalasi per titik jaringan\nPenjualan paket perangkat\nKontrak pemeliharaan bulanan"
+  },
+  sah: blankSah(),
   ai: { topik: "", model: "Project-Based Learning (PjBL)", n: 3, catatan: "" }
 }; }
+function blankSah() { return { kota: "Tangerang", tanggal: "", kepsek: "", nipKepsek: "", guru: "", nipGuru: "", waka: "", nipWaka: "" }; }
+function blankRubrik() { return { aspek: "", k4: "", k3: "", k2: "", k1: "" }; }
+function blankExtras() {
+  return { asesmenAwal: "", formatif: "", sumatif: "", rubrik: [blankRubrik()], remedial: "", pengayaan: "",
+    lkpd: { judul: "", tujuan: "", alat: "", k3: "", langkah: "", tugas: "" }, bmc: blankBmc() };
+}
+var BMC = [
+  ["mitra", "kp", "Mitra Utama", "Key Partners"], ["aktivitas", "ka", "Aktivitas Utama", "Key Activities"],
+  ["sumberDaya", "kr", "Sumber Daya Utama", "Key Resources"], ["nilai", "vp", "Proposisi Nilai", "Value Propositions"],
+  ["hubungan", "cr", "Hubungan Pelanggan", "Customer Relationships"], ["saluran", "ch", "Saluran", "Channels"],
+  ["segmen", "cs", "Segmen Pelanggan", "Customer Segments"], ["biaya", "co", "Struktur Biaya", "Cost Structure"],
+  ["pendapatan", "rv", "Arus Pendapatan", "Revenue Streams"]
+];
+function blankBmc() { var o = { produk: "" }; BMC.forEach(function (b) { o[b[0]] = ""; }); return o; }
+function hasBmc(s) { var m = s.bmc || {}; return !!(String(m.produk || "").trim() || BMC.some(function (b) { return String(m[b[0]] || "").trim(); })); }
 function blank() {
-  var s = example();
+  var s = Object.assign(example(), blankExtras());
   ["sekolah","mapel","program","kelas","waktu","murid","materi","topik","tujuan","praktik","kemitraan","lingkungan","digital"].forEach(function (k) { s[k] = ""; });
   s.dimensi = DIMS.map(function () { return false; });
   s.pertemuan = [{ langkah: [{ nama: "", aktivitas: "", sumber: "" }] }];
@@ -177,7 +253,16 @@ function blank() {
 }
 
 var state = example();
-try { var saved = JSON.parse(localStorage.getItem(KEY) || "null"); if (saved && saved.pertemuan && saved.dimensi) state = Object.assign(example(), saved); } catch (e) {}
+try {
+  var saved = JSON.parse(localStorage.getItem(KEY) || "null");
+  if (saved && saved.pertemuan && saved.dimensi) {
+    state = Object.assign(example(), blankExtras(), { sah: blankSah() }, saved);
+    state.sah = Object.assign(blankSah(), state.sah);
+    state.lkpd = Object.assign(blankExtras().lkpd, state.lkpd);
+    state.bmc = Object.assign(blankBmc(), state.bmc);
+    if (!Array.isArray(state.rubrik) || !state.rubrik.length) state.rubrik = [blankRubrik()];
+  }
+} catch (e) {}
 function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
 
 /* ---------- helpers ---------- */
@@ -208,7 +293,7 @@ function ta(label, path, rows, ph) { return '<div class="fld"><label for="' + fi
 function renderForm() {
   var h = "";
   h += '<section class="sec ai"><h2>Isi otomatis dengan AI</h2>' +
-    '<p class="hint">Lengkapi Identitas di bawah, tulis topiknya, lalu AI menyusun bagian B sampai E. Hasilnya tetap bisa Anda sunting.</p>' +
+    '<p class="hint">Lengkapi Identitas di bawah, tulis topiknya, lalu AI menyusun bagian B sampai F beserta rubrik dan LKPD. Hasilnya tetap bisa Anda sunting.</p>' +
     inp("Topik / materi pokok", "ai.topik", "mis. Subnetting CIDR dan VLSM") +
     '<div class="row2"><div class="fld"><label for="f-ai-model">Model pembelajaran</label><select id="f-ai-model" data-path="ai.model">' +
     ["Project-Based Learning (PjBL)", "Problem-Based Learning (PBL)", "Discovery Learning", "Inquiry Learning", "Teaching Factory (TeFa)", "Pembelajaran Berdiferensiasi"].map(function (m) { return "<option" + (m === state.ai.model ? " selected" : "") + ">" + esc(m) + "</option>"; }).join("") +
@@ -255,7 +340,41 @@ function renderForm() {
   h += '<div><button type="button" data-act="addp">+ Tambah pertemuan</button></div></section>';
 
   h += '<section class="sec"><h2><span class="ltr">E</span>Asesmen</h2>' +
-    ta("1. Asesmen Formatif", "formatif", 3) + ta("2. Asesmen Sumatif", "sumatif", 3) + '</section>';
+    ta("1. Asesmen Awal / Diagnostik (satu per baris)", "asesmenAwal", 3) +
+    ta("2. Asesmen Formatif (satu per baris)", "formatif", 3) + ta("3. Asesmen Sumatif (satu per baris)", "sumatif", 3) +
+    '<div class="fld"><span class="lbl">4. Rubrik Penilaian</span><p class="hint">Satu baris rubrik per aspek, dengan deskripsi untuk skor 4 sampai 1.</p></div>';
+  state.rubrik.forEach(function (r, ri) {
+    var base = "rubrik." + ri;
+    h += '<div class="step"><div class="step-h"><span class="lbl">Aspek ' + (ri + 1) + '</span>' +
+      (state.rubrik.length > 1 ? '<button type="button" class="mini del" data-act="delr" data-r="' + ri + '">Hapus</button>' : "") + '</div>' +
+      inp("Aspek yang dinilai", base + ".aspek", "mis. Ketepatan perhitungan") +
+      '<div class="row2">' + ta("Sangat Baik (4)", base + ".k4", 2) + ta("Baik (3)", base + ".k3", 2) + '</div>' +
+      '<div class="row2">' + ta("Cukup (2)", base + ".k2", 2) + ta("Perlu Bimbingan (1)", base + ".k1", 2) + '</div></div>';
+  });
+  h += '<div><button type="button" class="mini" data-act="addr">+ Tambah aspek</button></div></section>';
+
+  h += '<section class="sec"><h2><span class="ltr">F</span>Tindak Lanjut</h2>' +
+    ta("1. Remedial (satu per baris)", "remedial", 3, "untuk murid yang belum mencapai KKTP") +
+    ta("2. Pengayaan (satu per baris)", "pengayaan", 3, "untuk murid yang sudah mencapai KKTP") + '</section>';
+
+  h += '<section class="sec"><h2><span class="ltr">P</span>Halaman Pengesahan</h2>' +
+    '<p class="hint">Dicetak di halaman tersendiri. Nama yang dikosongkan tampil sebagai garis titik untuk diisi tangan.</p>' +
+    '<div class="row2">' + inp("Kota", "sah.kota") + inp("Tanggal", "sah.tanggal", "mis. 14 Juli 2026") + '</div>' +
+    '<div class="row2">' + inp("Nama Kepala Sekolah", "sah.kepsek") + inp("NIP Kepala Sekolah", "sah.nipKepsek") + '</div>' +
+    '<div class="row2">' + inp("Nama Guru Mata Pelajaran", "sah.guru") + inp("NIP Guru", "sah.nipGuru") + '</div>' +
+    '<div class="row2">' + inp("Waka Kurikulum (opsional)", "sah.waka") + inp("NIP Waka Kurikulum", "sah.nipWaka") + '</div></section>';
+
+  h += '<section class="sec"><h2><span class="ltr">L</span>Lampiran: Jobsheet / LKPD</h2>' +
+    '<p class="hint">Dicetak di halaman tersendiri setelah halaman pengesahan, lengkap dengan kolom nama murid.</p>' +
+    inp("Judul kegiatan", "lkpd.judul") + ta("Tujuan (satu per baris)", "lkpd.tujuan", 3) +
+    ta("Alat dan bahan (satu per baris)", "lkpd.alat", 3) + ta("Keselamatan kerja / K3 (satu per baris)", "lkpd.k3", 3) +
+    ta("Langkah kerja (satu langkah per baris, dinomori otomatis)", "lkpd.langkah", 6) +
+    ta("Tugas / pertanyaan (satu per baris, dinomori otomatis)", "lkpd.tugas", 3) + '</section>';
+
+  h += '<section class="sec"><h2><span class="ltr w">BMC</span>Lampiran: Business Model Canvas</h2>' +
+    '<p class="hint">Dicetak di halaman mendatar (landscape) paling akhir. Kosongkan semua kolom bila RPM ini tidak memerlukan BMC.</p>' +
+    inp("Produk / jasa", "bmc.produk", "mis. Jasa instalasi jaringan sekolah") +
+    '<div class="row2">' + BMC.map(function (b) { return ta(b[2] + " (satu per baris)", "bmc." + b[0], 3); }).join("") + '</div></section>';
   document.getElementById("form").innerHTML = h;
   syncCaps();
 }
@@ -299,16 +418,72 @@ function renderPreview() {
     h += "</table>";
   });
   h += '<p class="hd">E.&nbsp; Asesmen</p>';
-  h += '<p class="n1">1.&nbsp; Asesmen Formatif</p>' + blockH(s.formatif, "b1");
-  h += '<p class="n1">2.&nbsp; Asesmen Sumatif</p>' + blockH(s.sumatif, "b1");
-  document.getElementById("paper").innerHTML = h;
+  h += '<p class="n1">1.&nbsp; Asesmen Awal</p>' + blockH(s.asesmenAwal, "b1");
+  h += '<p class="n1">2.&nbsp; Asesmen Formatif</p>' + blockH(s.formatif, "b1");
+  h += '<p class="n1">3.&nbsp; Asesmen Sumatif</p>' + blockH(s.sumatif, "b1");
+  h += '<p class="n1">4.&nbsp; Rubrik Penilaian</p>';
+  var rb = rubrikRows(s);
+  h += '<table class="rb"><colgroup><col style="width:6%"><col style="width:22%"><col><col><col><col></colgroup><tr><th>No</th><th>Aspek</th><th>Sangat Baik (4)</th><th>Baik (3)</th><th>Cukup (2)</th><th>Perlu Bimbingan (1)</th></tr>' +
+    rb.map(function (r, i) { return '<tr><td class="n">' + (i + 1) + "</td><td>" + ih(r.aspek) + "</td><td>" + ih(r.k4) + "</td><td>" + ih(r.k3) + "</td><td>" + ih(r.k2) + "</td><td>" + ih(r.k1) + "</td></tr>"; }).join("") + "</table>";
+  h += '<p class="formula">' + esc(formula(rb.length)) + "</p>";
+  h += '<p class="hd">F.&nbsp; Tindak Lanjut</p>';
+  h += '<p class="n1">1.&nbsp; Remedial</p>' + blockH(s.remedial, "b1");
+  h += '<p class="n1">2.&nbsp; Pengayaan</p>' + blockH(s.pengayaan, "b1");
+
+  var sh = '<p class="pgl">Halaman pengesahan</p><h3>LEMBAR PENGESAHAN</h3><p class="lead">' + esc(sahText(s)) + "</p>";
+  var sg = sigData(s);
+  sh += '<table class="sig"><tr><td>' + esc(sg.leftTop) + "<br>" + esc(sg.leftRole) + "</td><td>" + esc(sg.rightTop) + "<br>" + esc(sg.rightRole) + '</td></tr><tr><td class="sp"></td><td class="sp"></td></tr>' +
+    '<tr><td><span class="nm">' + esc(sg.kepsek) + "</span><br>" + esc(sg.nipKepsek) + '</td><td><span class="nm">' + esc(sg.guru) + "</span><br>" + esc(sg.nipGuru) + "</td></tr>";
+  if (sg.waka) sh += '<tr><td colspan="2" style="padding-top:2.2em">Diperiksa oleh,<br>Wakil Kepala Sekolah Bidang Kurikulum</td></tr><tr><td colspan="2" class="sp"></td></tr><tr><td colspan="2"><span class="nm">' + esc(sg.waka) + "</span><br>" + esc(sg.nipWaka) + "</td></tr>";
+  sh += "</table>";
+
+  var L = s.lkpd, lh = '<p class="pgl">Lampiran</p><h3 style="margin-bottom:.3em">LEMBAR KERJA PESERTA DIDIK (LKPD) / JOBSHEET</h3>' +
+    '<p style="text-align:center;font-weight:bold;margin-bottom:1em">' + (ih(L.judul) || "&nbsp;") + "</p>";
+  lh += '<table class="kv"><colgroup><col style="width:30%"><col style="width:4%"><col></colgroup>' +
+    lkpdIdent(s).map(function (r) { return "<tr><td>" + r[0] + "</td><td>:</td><td>" + esc(r[1]) + "</td></tr>"; }).join("") + "</table>";
+  lh += '<p class="n1">A.&nbsp; Tujuan</p>' + listH(L.tujuan, "b1");
+  lh += '<p class="n1">B.&nbsp; Alat dan Bahan</p>' + listH(L.alat, "b1");
+  lh += '<p class="n1">C.&nbsp; Keselamatan Kerja (K3)</p>' + listH(L.k3, "b1");
+  lh += '<p class="n1">D.&nbsp; Langkah Kerja</p>' + olH(L.langkah);
+  lh += '<p class="n1">E.&nbsp; Tugas / Pertanyaan</p>' + olH(L.tugas);
+  lh += '<p class="n1">F.&nbsp; Kesimpulan</p>' + [0, 1, 2].map(function () { return '<p class="dots">' + DOTS + "</p>"; }).join("");
+
+  var bh = "";
+  if (hasBmc(s)) {
+    var M = s.bmc;
+    bh = '<div class="paper land"><p class="pgl">Lampiran · halaman mendatar</p><h3 style="margin-bottom:.2em">BUSINESS MODEL CANVAS (BMC)</h3>' +
+      '<p style="text-align:center;margin-bottom:1em"><b>Produk/Jasa:</b> ' + (ih(M.produk) || "&nbsp;") + "</p>" +
+      '<div class="bmc-wrap"><div class="bmc">' + BMC.map(function (b) {
+        var ls = lines(M[b[0]]);
+        return '<div class="' + b[1] + '"><h4>' + b[2] + '</h4><div class="en">' + b[3] + "</div>" + (ls.length ? "<ul>" + ls.map(function (l) { return "<li>" + ih(l) + "</li>"; }).join("") + "</ul>" : "") + "</div>";
+      }).join("") + "</div></div></div>";
+  }
+  document.getElementById("paper").innerHTML = '<div class="paper">' + h + '</div><div class="paper">' + sh + '</div><div class="paper">' + lh + "</div>" + bh;
 }
+var DOTS = "..........................................................................................................................";
+function olH(text) { var ls = lines(text); return ls.length ? "<ol>" + ls.map(function (l) { return "<li>" + ih(l) + "</li>"; }).join("") + "</ol>" : '<p class="b1">&nbsp;</p>'; }
+function rubrikRows(s) { var r = (s.rubrik || []).filter(function (x) { return x && (x.aspek || x.k4 || x.k3 || x.k2 || x.k1); }); return r.length ? r : [blankRubrik()]; }
+function formula(n) { return "Nilai = (jumlah skor perolehan ÷ skor maksimal) × 100; skor maksimal = 4 × " + n + " aspek = " + (4 * n) + "."; }
+function sahText(s) {
+  return "Rencana Pembelajaran Mendalam (RPM) " + [s.mapel ? "mata pelajaran/elemen " + s.mapel : "", s.kelas ? "kelas " + s.kelas : "", s.sekolah ? "di " + s.sekolah : ""].filter(Boolean).join(" ") +
+    " ini telah diperiksa dan disahkan untuk digunakan dalam kegiatan pembelajaran.";
+}
+function sigData(s) {
+  var S = s.sah || blankSah(), nm = function (v) { return String(v || "").trim() || "(.......................................)"; }, nip = function (v) { return "NIP. " + (String(v || "").trim() || "......................................"); };
+  return {
+    leftTop: "Mengetahui,", leftRole: "Kepala " + (s.sekolah || "Sekolah"),
+    rightTop: (S.kota || "..................") + ", " + (S.tanggal || "........................"), rightRole: "Guru Mata Pelajaran",
+    kepsek: nm(S.kepsek), nipKepsek: nip(S.nipKepsek), guru: nm(S.guru), nipGuru: nip(S.nipGuru),
+    waka: String(S.waka || "").trim(), nipWaka: nip(S.nipWaka)
+  };
+}
+function lkpdIdent(s) { return [["Mata Pelajaran/Elemen", s.mapel || ""], ["Kelas", s.kelas || ""], ["Nama Murid", "......................................................"], ["No. Absen / Kelompok", "......................................................"], ["Tanggal", "......................................................"]]; }
 
 /* ---------- DOCX (WordprocessingML ditulis langsung) ---------- */
 function xe(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, ""); }
 function run(t, o) {
   o = o || {};
-  var pr = (o.b ? "<w:b/><w:bCs/>" : "") + (o.i ? "<w:i/><w:iCs/>" : "") + (o.sz ? '<w:sz w:val="' + o.sz + '"/><w:szCs w:val="' + o.sz + '"/>' : "");
+  var pr = (o.b ? "<w:b/><w:bCs/>" : "") + (o.i ? "<w:i/><w:iCs/>" : "") + (o.u ? '<w:u w:val="single"/>' : "") + (o.sz ? '<w:sz w:val="' + o.sz + '"/><w:szCs w:val="' + o.sz + '"/>' : "");
   return "<w:r>" + (pr ? "<w:rPr>" + pr + "</w:rPr>" : "") + '<w:t xml:space="preserve">' + xe(t) + "</w:t></w:r>";
 }
 function runs(text, base) {
@@ -320,6 +495,7 @@ function para(content, o) {
   o = o || {};
   var pr = "";
   if (o.keep) pr += "<w:keepNext/>";
+  if (o.pb) pr += "<w:pageBreakBefore/>";
   if (o.num) pr += '<w:numPr><w:ilvl w:val="0"/><w:numId w:val="' + o.num + '"/></w:numPr>';
   if (o.tabs) pr += "<w:tabs>" + o.tabs.map(function (t) { return '<w:tab w:val="left" w:pos="' + t + '"/>'; }).join("") + "</w:tabs>";
   if (o.before != null || o.after != null || o.line) pr += "<w:spacing" + (o.before != null ? ' w:before="' + o.before + '"' : "") + (o.after != null ? ' w:after="' + o.after + '"' : "") + (o.line ? ' w:line="' + o.line + '" w:lineRule="auto"' : "") + "/>";
@@ -332,6 +508,7 @@ function cell(w, content, o) {
   o = o || {};
   var pr = '<w:tcW w:w="' + w + '" w:type="dxa"/>' + (o.span ? '<w:gridSpan w:val="' + o.span + '"/>' : "") +
     (o.box ? "<w:tcBorders>" + BORD + "</w:tcBorders>" : "") + (o.fill ? '<w:shd w:val="clear" w:color="auto" w:fill="' + o.fill + '"/>' : "") +
+    (o.vm ? (o.vm === "restart" ? '<w:vMerge w:val="restart"/>' : "<w:vMerge/>") : "") +
     (o.va ? '<w:vAlign w:val="' + o.va + '"/>' : "");
   return "<w:tc><w:tcPr>" + pr + "</w:tcPr>" + (content || para("")) + "</w:tc>";
 }
@@ -401,9 +578,68 @@ function documentXml(s) {
     b += table(pw, tr, { grid: true });
   });
   b += para(run("E.  Asesmen", { b: true }), { before: 360, keep: true });
-  b += h1("1.  Asesmen Formatif") + blockX(s.formatif, 284);
-  b += h1("2.  Asesmen Sumatif") + blockX(s.sumatif, 284);
-  b += '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr>';
+  b += h1("1.  Asesmen Awal") + blockX(s.asesmenAwal, 284);
+  b += h1("2.  Asesmen Formatif") + blockX(s.formatif, 284);
+  b += h1("3.  Asesmen Sumatif") + blockX(s.sumatif, 284);
+  b += h1("4.  Rubrik Penilaian");
+  var rb = rubrikRows(s), rw = [500, 1900, 1590, 1590, 1590, 1572];
+  var rth = function (w, t) { return cell(w, para(run(t, { b: true, sz: 20 }), { jc: "center", line: 240 }), { fill: PEACH, va: "center" }); };
+  var rc = function (w, t, jc) { return cell(w, para(runs(t, { sz: 20 }), { line: 240, jc: jc })); };
+  var rr = row(rth(rw[0], "No") + rth(rw[1], "Aspek") + rth(rw[2], "Sangat Baik (4)") + rth(rw[3], "Baik (3)") + rth(rw[4], "Cukup (2)") + rth(rw[5], "Perlu Bimbingan (1)"), true);
+  rb.forEach(function (x, i) { rr += row(rc(rw[0], String(i + 1), "center") + rc(rw[1], x.aspek) + rc(rw[2], x.k4) + rc(rw[3], x.k3) + rc(rw[4], x.k2) + rc(rw[5], x.k1)); });
+  b += table(rw, rr, { grid: true, ind: 284 });
+  b += para(run(formula(rb.length), { sz: 22 }), { left: 284, before: 80 });
+  b += para(run("F.  Tindak Lanjut", { b: true }), { before: 360, keep: true });
+  b += h1("1.  Remedial") + blockX(s.remedial, 284);
+  b += h1("2.  Pengayaan") + blockX(s.pengayaan, 284);
+
+  /* Halaman pengesahan */
+  var sg = sigData(s), half = 4513;
+  b += para(run("LEMBAR PENGESAHAN", { b: true }), { jc: "center", after: 480, pb: true });
+  b += para(run(sahText(s)), { jc: "both", after: 720 });
+  var sc = function (lines2, span) { return cell(span ? W : half, lines2.map(function (x) { return para(x, { jc: "center" }); }).join(""), { span: span }); };
+  var srows = row(sc([run(sg.leftTop), run(sg.leftRole)]) + sc([run(sg.rightTop), run(sg.rightRole)])) +
+    row(sc(["", "", ""]) + sc(["", "", ""])) +
+    row(sc([run(sg.kepsek, { b: true, u: true }), run(sg.nipKepsek)]) + sc([run(sg.guru, { b: true, u: true }), run(sg.nipGuru)]));
+  if (sg.waka) srows += row(sc(["", "", run("Diperiksa oleh,"), run("Wakil Kepala Sekolah Bidang Kurikulum"), "", "", ""], 2)) + row(sc([run(sg.waka, { b: true, u: true }), run(sg.nipWaka)], 2));
+  b += table([half, half], srows);
+
+  /* Lampiran LKPD */
+  var L = s.lkpd || {};
+  b += para(run("LEMBAR KERJA PESERTA DIDIK (LKPD) / JOBSHEET", { b: true }), { jc: "center", pb: true });
+  b += para(runs(L.judul, { b: true }), { jc: "center", after: 240 });
+  var kw = [2700, 360, 5966], kr = "";
+  lkpdIdent(s).forEach(function (x) { kr += row(cell(kw[0], para(run(x[0]))) + cell(kw[1], para(run(":"))) + cell(kw[2], para(run(x[1])))); });
+  b += "<w:tbl><w:tblPr><w:tblW w:w=\"9026\" w:type=\"dxa\"/><w:tblBorders>" + BORD + "</w:tblBorders><w:tblLayout w:type=\"fixed\"/></w:tblPr><w:tblGrid><w:gridCol w:w=\"2700\"/><w:gridCol w:w=\"360\"/><w:gridCol w:w=\"5966\"/></w:tblGrid>" + kr + "</w:tbl>";
+  b += h1("A.  Tujuan") + listX(L.tujuan, 3, 284);
+  b += h1("B.  Alat dan Bahan") + listX(L.alat, 3, 284);
+  b += h1("C.  Keselamatan Kerja (K3)") + listX(L.k3, 3, 284);
+  b += h1("D.  Langkah Kerja") + listX(L.langkah, 4, 284);
+  b += h1("E.  Tugas / Pertanyaan") + listX(L.tugas, 5, 284);
+  b += h1("F.  Kesimpulan") + [0, 1, 2].map(function () { return para(run("........................................................................................................................"), { left: 284 }); }).join("");
+  var MAR = '<w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="708" w:footer="708" w:gutter="0"/>';
+  var PORT = '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/>' + MAR + "</w:sectPr>";
+  if (!hasBmc(s)) { b += PORT; }
+  else {
+    /* Lampiran BMC di bagian (section) baru yang mendatar */
+    b += "<w:p><w:pPr>" + PORT + "</w:pPr></w:p>";
+    var M = s.bmc, cw10 = 1395, G = [cw10, cw10, cw10, cw10, cw10, cw10, cw10, cw10, cw10, cw10];
+    b += para(run("BUSINESS MODEL CANVAS (BMC)", { b: true }), { jc: "center" });
+    b += para(run("Produk/Jasa: ", { b: true }) + runs(M.produk), { jc: "center", after: 160 });
+    var box = function (key, span, vm) {
+      var d = BMC.filter(function (x) { return x[0] === key; })[0], ls = lines(M[key]);
+      var body = para(run(d[2], { b: true, sz: 20 }), { line: 240 }) + para(run(d[3], { i: true, sz: 16 }), { line: 240, after: 60 }) +
+        ls.map(function (l) { return para(runs(l, { sz: 18 }), { num: 3, left: 227, hang: 227, line: 240 }); }).join("");
+      return cell(cw10 * span, body, { span: span, vm: vm });
+    };
+    var cont = function (span) { return cell(cw10 * span, para(""), { span: span, vm: "continue" }); };
+    var tall = function (cells, h) { return '<w:tr><w:trPr><w:trHeight w:val="' + h + '" w:hRule="atLeast"/></w:trPr>' + cells + "</w:tr>"; };
+    var br = tall(box("mitra", 2, "restart") + box("aktivitas", 2) + box("nilai", 2, "restart") + box("hubungan", 2) + box("segmen", 2, "restart"), 2700) +
+      tall(cont(2) + box("sumberDaya", 2) + cont(2) + box("saluran", 2) + cont(2), 2700) +
+      tall(box("biaya", 5) + box("pendapatan", 5), 1700);
+    b += table(G, br, { grid: true });
+    b += '<w:sectPr><w:pgSz w:w="16838" w:h="11906" w:orient="landscape"/>' + MAR + "</w:sectPr>";
+  }
   return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>' + b + "</w:body></w:document>";
 }
 var NS = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"';
@@ -411,7 +647,11 @@ var STYLES = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles '
 function absNum(id, ch, font) { return '<w:abstractNum w:abstractNumId="' + id + '"><w:multiLevelType w:val="hybridMultilevel"/><w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="bullet"/><w:lvlText w:val="' + ch + '"/><w:lvlJc w:val="left"/><w:pPr><w:ind w:left="720" w:hanging="360"/></w:pPr><w:rPr><w:rFonts w:ascii="' + font + '" w:hAnsi="' + font + '" w:hint="default"/></w:rPr></w:lvl></w:abstractNum>'; }
 /* 1 = panah (tujuan), 2 = centang (kemitraan), 3 = bulat */
 var NUMBERING = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:numbering ' + NS + '>' + absNum(0, "", "Wingdings") + absNum(1, "", "Wingdings") + absNum(2, "", "Symbol") +
-  '<w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num><w:num w:numId="2"><w:abstractNumId w:val="1"/></w:num><w:num w:numId="3"><w:abstractNumId w:val="2"/></w:num></w:numbering>';
+  absDec(3) + absDec(4) +
+  '<w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num><w:num w:numId="2"><w:abstractNumId w:val="1"/></w:num><w:num w:numId="3"><w:abstractNumId w:val="2"/></w:num>' +
+  '<w:num w:numId="4"><w:abstractNumId w:val="3"/></w:num><w:num w:numId="5"><w:abstractNumId w:val="4"/></w:num></w:numbering>';
+/* 4 = langkah kerja, 5 = tugas (bernomor 1, 2, 3, …) */
+function absDec(id) { return '<w:abstractNum w:abstractNumId="' + id + '"><w:multiLevelType w:val="hybridMultilevel"/><w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="decimal"/><w:lvlText w:val="%1."/><w:lvlJc w:val="left"/><w:pPr><w:ind w:left="720" w:hanging="360"/></w:pPr></w:lvl></w:abstractNum>'; }
 var CT = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/></Types>';
 var RELS = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>';
 var DRELS = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/></Relationships>';
@@ -499,6 +739,22 @@ function applyAi(d) {
   });
   if (pts.length) state.pertemuan = pts;
   state.formatif = str(d.formatif); state.sumatif = str(d.sumatif);
+  if (d.asesmenAwal != null) state.asesmenAwal = str(d.asesmenAwal);
+  var rb = (Array.isArray(d.rubrik) ? d.rubrik : []).filter(function (r) { return r && typeof r === "object"; }).map(function (r) {
+    return { aspek: str(r.aspek), k4: str(r.sangatBaik != null ? r.sangatBaik : r.k4), k3: str(r.baik != null ? r.baik : r.k3), k2: str(r.cukup != null ? r.cukup : r.k2), k1: str(r.perluBimbingan != null ? r.perluBimbingan : r.k1) };
+  });
+  if (rb.length) state.rubrik = rb;
+  if (d.remedial != null) state.remedial = str(d.remedial);
+  if (d.pengayaan != null) state.pengayaan = str(d.pengayaan);
+  if (d.lkpd && typeof d.lkpd === "object") {
+    var L = d.lkpd;
+    state.lkpd = { judul: str(L.judul), tujuan: str(L.tujuan), alat: str(L.alat), k3: str(L.k3), langkah: str(L.langkah), tugas: str(L.tugas) };
+  }
+  if (d.bmc && typeof d.bmc === "object") {
+    var nb = { produk: str(d.bmc.produk) };
+    BMC.forEach(function (x) { nb[x[0]] = str(d.bmc[x[0]]); });
+    state.bmc = nb;
+  }
 }
 function aiPrompt(forCopy) {
   var s = state, n = Math.max(1, Math.min(8, parseInt(s.ai.n, 10) || 3));
@@ -511,9 +767,17 @@ function aiPrompt(forCopy) {
     '"praktik": "model pembelajaran dan integrasi prinsip pembelajaran mendalam", "kemitraan": [{"mapel": "mata pelajaran/pihak mitra", "uraian": "bentuk kolaborasi"}], ' +
     '"lingkungan": "lingkungan belajar fisik/virtual", "digital": ["perangkat lunak/platform yang dipakai"], ' +
     '"pertemuan": [{"langkah": [{"nama": "nama langkah", "aktivitas": ["aktivitas guru dan murid"], "sumber": "sumber materi"}]}], ' +
-    '"formatif": ["bentuk asesmen formatif"], "sumatif": ["bentuk asesmen sumatif"]}\n\n' +
+    '"asesmenAwal": ["bentuk asesmen awal/diagnostik"], "formatif": ["bentuk asesmen formatif"], "sumatif": ["bentuk asesmen sumatif"], ' +
+    '"rubrik": [{"aspek": "aspek yang dinilai", "sangatBaik": "deskriptor skor 4", "baik": "deskriptor skor 3", "cukup": "deskriptor skor 2", "perluBimbingan": "deskriptor skor 1"}], ' +
+    '"remedial": ["kegiatan remedial"], "pengayaan": ["kegiatan pengayaan"], ' +
+    '"lkpd": {"judul": "judul kegiatan praktik utama", "tujuan": ["tujuan kegiatan"], "alat": ["alat dan bahan"], "k3": ["aturan keselamatan kerja"], "langkah": ["langkah kerja berurutan"], "tugas": ["tugas/pertanyaan"]}, ' +
+    '"bmc": {"produk": "produk/jasa yang dihasilkan", "mitra": ["mitra utama"], "aktivitas": ["aktivitas utama"], "sumberDaya": ["sumber daya utama"], "nilai": ["proposisi nilai"], "hubungan": ["hubungan pelanggan"], "saluran": ["saluran"], "segmen": ["segmen pelanggan"], "biaya": ["struktur biaya"], "pendapatan": ["arus pendapatan"]}}\n\n' +
     "ATURAN:\n- Buat tepat " + n + " pertemuan. Tiap pertemuan memuat langkah Pendahuluan, langkah-langkah inti mengikuti sintaks " + s.ai.model + " (sebarkan sintaks secara berurutan antarpertemuan dan tandai prinsip Mindful/Meaningful/Joyful pada nama langkah bila sesuai), lalu Penutup berisi refleksi.\n" +
-    "- Tiap langkah berisi 3-8 aktivitas konkret dan spesifik pada topik, satu kalimat per aktivitas.\n- Gunakan kata \"murid\", bukan \"siswa\".\n- Apit istilah asing dengan satu tanda bintang (*contoh*). Jangan gunakan markdown lain.\n- Jangan pakai tanda kutip ganda di dalam isi teks; bila perlu mengutip, pakai tanda kutip tunggal ('...').";
+    "- Tiap langkah berisi 3-8 aktivitas konkret dan spesifik pada topik, satu kalimat per aktivitas.\n" +
+    "- Asesmen awal, formatif, dan sumatif masing-masing 2-4 butir. Rubrik berisi 3-5 aspek yang selaras dengan asesmen sumatif, dengan deskriptor singkat dan dapat diamati.\n" +
+    "- Remedial dan pengayaan masing-masing 2-3 butir.\n" +
+    "- LKPD/jobsheet untuk kegiatan praktik utama: tujuan 2-4 butir, alat dan bahan 3-6, K3 2-4, langkah kerja 6-12 langkah berurutan (tanpa nomor), tugas/pertanyaan 3-5.\n" +
+    "- Business Model Canvas (bmc) untuk produk/jasa hasil proyek, realistis untuk Teaching Factory SMK; bila topik tidak menghasilkan produk, pilih produk/jasa yang paling relevan dengan kompetensinya. Tiap blok 2-4 butir singkat.\n- Gunakan kata \"murid\", bukan \"siswa\".\n- Apit istilah asing dengan satu tanda bintang (*contoh*). Jangan gunakan markdown lain.\n- Jangan pakai tanda kutip ganda di dalam isi teks; bila perlu mengutip, pakai tanda kutip tunggal ('...').";
 }
 function runAi() {
   var note = document.getElementById("aiNote");
@@ -626,14 +890,16 @@ form.addEventListener("click", function (e) {
   if (a === "copyp") return copyPrompt();
   if (a === "applyp") return applyPasted();
   if (a === "stop") { if (ctl) ctl.abort(); return; }
+  if (a === "addr") state.rubrik.push(blankRubrik());
+  if (a === "delr") state.rubrik.splice(+b.dataset.r, 1);
   if (a === "addp") state.pertemuan.push({ langkah: [{ nama: "", aktivitas: "", sumber: "" }] });
   if (a === "delp") state.pertemuan.splice(p, 1);
   if (a === "addl") state.pertemuan[p].langkah.push({ nama: "", aktivitas: "", sumber: "" });
   if (a === "dell") state.pertemuan[p].langkah.splice(l, 1);
   save(); renderForm(); renderPreview();
 });
-document.getElementById("btnClear").addEventListener("click", function () { var ai = state.ai; state = blank(); state.ai = ai; save(); renderForm(); renderPreview(); });
-document.getElementById("btnExample").addEventListener("click", function () { state = example(); save(); renderForm(); renderPreview(); });
+document.getElementById("btnClear").addEventListener("click", function () { var ai = state.ai, sah = state.sah; state = blank(); state.ai = ai; state.sah = sah; save(); renderForm(); renderPreview(); });
+document.getElementById("btnExample").addEventListener("click", function () { var sah = state.sah; state = example(); state.sah = sah || blankSah(); save(); renderForm(); renderPreview(); });
 
 renderForm(); renderPreview();
 })();
